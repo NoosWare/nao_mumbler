@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+micprocessor/build-sys-linux-x86_64/
+micprocessor/build-cross-atom/

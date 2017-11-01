@@ -1,0 +1,4 @@
+[submodule "micprocessor/AudioFile"]
+	path = micprocessor/AudioFile
+	url = https://github.com/adamstark/AudioFile.git
+    ignore = dirty
