@@ -1,4 +1,4 @@
-#include "alsoundprocessing.h"
+#include "alsoundprocessing.hpp"
 #include <alcommon/alproxy.h>
 #include <iostream>
 
@@ -14,29 +14,28 @@ ALSoundProcessing::ALSoundProcessing(boost::shared_ptr<ALBroker> pBroker,
 
 void ALSoundProcessing::init()
 {
-  fALMemoryKeys.push_back("ALSoundProcessing/leftMicEnergy");
-  fALMemoryKeys.push_back("ALSoundProcessing/rightMicEnergy");
-  fALMemoryKeys.push_back("ALSoundProcessing/frontMicEnergy");
-  fALMemoryKeys.push_back("ALSoundProcessing/rearMicEnergy");
+    fALMemoryKeys.push_back("ALSoundProcessing/leftMicEnergy");
+    fALMemoryKeys.push_back("ALSoundProcessing/rightMicEnergy");
+    fALMemoryKeys.push_back("ALSoundProcessing/frontMicEnergy");
+    fALMemoryKeys.push_back("ALSoundProcessing/rearMicEnergy");
 
-  fProxyToALMemory.insertData(fALMemoryKeys[0],0.0f);
-  fProxyToALMemory.insertData(fALMemoryKeys[1],0.0f);
-  fProxyToALMemory.insertData(fALMemoryKeys[2],0.0f);
-  fProxyToALMemory.insertData(fALMemoryKeys[3],0.0f);
+    fProxyToALMemory.insertData(fALMemoryKeys[0],0.0f);
+    fProxyToALMemory.insertData(fALMemoryKeys[1],0.0f);
+    fProxyToALMemory.insertData(fALMemoryKeys[2],0.0f);
+    fProxyToALMemory.insertData(fALMemoryKeys[3],0.0f);
 
-
-  // Do not call the function setClientPreferences in your constructor!
-  // setClientPreferences : can be called after its construction!
-  audioDevice->callVoid("setClientPreferences",
+    // Do not call the function setClientPreferences in your constructor!
+    // setClientPreferences : can be called after its construction!
+    audioDevice->callVoid("setClientPreferences",
                         getName(),                //Name of this module
                         48000,                    //48000 Hz requested
                         (int)ALLCHANNELS,         //4 Channels requested
                         1                         //Deinterleaving requested
                         );
 #ifdef SOUNDPROCESSING_IS_REMOTE
-  qi::Application::atStop(boost::bind(&ALSoundProcessing::stopDetection, this));
+    qi::Application::atStop(boost::bind(&ALSoundProcessing::stopDetection, this));
 #endif
-  startDetection();
+    startDetection();
 }
 
 ALSoundProcessing::~ALSoundProcessing()
@@ -52,13 +51,11 @@ void ALSoundProcessing::process(const int & nbOfChannels,			// number of channel
                                 const AL_SOUND_FORMAT * buffer,		// actual data buffer
                                 const ALValue & timeStamp)			// timestamp?
 {
-  /// Computation of the RMS power of the signal delivered by
-  /// each microphone on a 170ms buffer
-  /// init RMS power to 0
-  std::vector<float> fMicsEnergy;
-  for (int i=0; i < nbOfChannels ; i++) {
-    fMicsEnergy.push_back(0.0f);
-  }
+    /// Computation of the RMS power of the signal delivered by
+    /// each microphone on a 170ms buffer
+    /// init RMS power to 0
+    //
+    std::array<float, 4> fMicsEnergy = { 0.f, 0.f, 0.f, 0.f};
 
 	/// Calculation of the RMS power
 	for(int channelInd = 0; channelInd < nbOfChannels; channelInd++){
@@ -68,18 +65,21 @@ void ALSoundProcessing::process(const int & nbOfChannels,			// number of channel
     	}
     	fMicsEnergy[channelInd] /= (float)nbOfSamplesByChannel;
     	fMicsEnergy[channelInd]  = sqrtf(fMicsEnergy[channelInd]);
-  }
+    }
+    // reset the level array every 1000
+    if (count == 1000) {
+        count = 0;
+        level.fill(0.f);
+    }
 
-  /// Puts the result in ALMemory
-  /// (for example to be easily retrieved by another module)
-  for(int i=0 ; i<nbOfChannels ; i++)
-  {
-    fProxyToALMemory.insertData(fALMemoryKeys[i],fMicsEnergy[i]);
-  }
+    count++;
+    // TODO: we can average energy from left, right, front if needed
+    float e   = fMicsEnergy[2];
+    level[count] = e;
 
-  /// Displays the results on the Naoqi console
-  std::cout << "ALSoundProcessing Energy Left  = " <<  fMicsEnergy[0] << std::endl;
-  std::cout << "ALSoundProcessing Energy Right  = " << fMicsEnergy[1] << std::endl;
-  std::cout << "ALSoundProcessing Energy Front  = " << fMicsEnergy[2] << std::endl;
-  std::cout << "ALSoundProcessing Energy Rear  = " <<  fMicsEnergy[3] << std::endl;
+    // TODO: calculate arithmetic mean and geometric mean using level ?
+
+    std::cout << "Energy = " << e 
+              << std::endl;
+
 }
