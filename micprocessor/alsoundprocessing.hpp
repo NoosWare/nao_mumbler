@@ -15,6 +15,7 @@
 #include <alvalue/alvalue.h>
 #include <alproxies/almemoryproxy.h>
 #include <alaudio/alsoundextractor.h>
+#include "AudioFile/AudioFile.h"
 
 using namespace AL;
 
@@ -24,7 +25,8 @@ class ALSoundProcessing
 public:
     // CTOR
     ALSoundProcessing(boost::shared_ptr<ALBroker> pBroker, 
-                      std::string pName);
+                      std::string pName,
+                      float noise_level = 800.f);
 
     // DTOR
     virtual ~ALSoundProcessing();
@@ -44,19 +46,33 @@ public:
                const ALValue & timeStamp);
 
 private:
+    
+    // create an audio file buffer
+    void open_buffer(unsigned int channels,
+                     unsigned int samples);
+
+    // fill the buffer
+    void fill_buffer(unsigned int channels,
+                     unsigned int samples,
+                     const AL_SOUND_FORMAT * buffer);
+
+    // close the audio file (using existing buffer)
+    void close_buffer();
+
     ALMemoryProxy fProxyToALMemory;
     std::vector<std::string> fALMemoryKeys;
-    unsigned int count = 0;
-    float geo_mu = 0;
-    float avg_mu = 0; 
-    std::array<float,1000> level{};
 
-    // TODO: we need a temporary WAV object (create on detection of voice,
-    //                                       save on end of voice)
-    //
-    // TODO: we need a noise filter:
-    //
-    // F = 10 * log10 ( Geometric mean (E) / Arithmetic mean (E) )
-    //
+    unsigned int frequency = 48000;
+
+    static constexpr unsigned int window = 60; // 600ms speech window
+    float average = 0.f;                       // average microphone energy
+
+    std::array<float,window> level{};          // energy level window
+    float threshold = 800.f;                   // delta energy threshold
+    unsigned int count  = 0;                   // speech window counter
+    unsigned int delay  = 0;                   // delay closing file (allows for pauses)
+
+    using audio  = AudioFile<double>;
+    std::unique_ptr<audio> ptr;               // AudioFile pointer - valid only when recording
 };
 #endif

@@ -12,7 +12,7 @@ option(SOUNDPROCESSING_IS_REMOTE
         ON)
 # Create a executable named mic_processor
 # with the source file: main.cpp
-qi_create_bin(mic_processor main.cpp alsoundprocessing.cpp)
+qi_create_bin(mic_processor main.cpp alsoundprocessing.cpp AudioFile/AudioFile.cpp)
 
 # link with
 qi_use_lib(mic_processor ALCOMMON ALPROXIES ALAUDIO QI boost_system boost_thread pthread)
