@@ -1,4 +1,10 @@
 #include "speech_processor.hpp"
+#include "json/src/json.hpp"
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
+using json = nlohmann::json;
 
 constexpr char speech_processor::URL[];
 
@@ -70,10 +76,41 @@ size_t speech_processor::reply(void * data,
     std::string result;
     size_t realsize = size * nmemb;
     result.append((char*)data, realsize);
-    // TODO: this is where we need to chain a callback
-    //      
+    
+    json result_json;
+    try {    
+        result_json = json::parse(result);
+    }
+    catch (std::exception & e) {
+        std::cerr << e.what() << std::endl;
+    }
+    for (const auto result : result_json["results"]) {
+    //    auto alternatives_obj = result["alternatives"];
+        for (const auto alternative :  result["alternatives"]) {
+            std::string sentence = alternative["transcript"].get<std::string>();
+            std::cout << sentence;
+            size_t position = sentence.find(robotname__);
+            if (position < sentence.length() && position >= 0)
+                sentence.replace(position, robotname__.length(), "$robot");
+            std::istringstream iss(sentence);
+            std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
+                                            std::istream_iterator<std::string>{}};
+            auto s_t = mumbler::state_trait(tokens);
+            auto a_t = mumbler::agent::on_policy(s_t, pool__);
+			std::string response;
+			for (const auto & str : reply) {
+				std::string prefix_u("$user");
+				std::string prefix_r("$robot");
+				if (!str.compare(0, prefix_u.size(), prefix_u))
+					response += username__ + " ";
+				else if (!str.compare(0, prefix_r.size(), prefix_r))
+					response += robotname__ + " ";
+				else
+					response += str + " ";
+			}
+        }
+    }
     // NOTE: result is a JSON which needs to be parsed!
     //
-    std::cout << result << std::endl;
     return realsize;
 }

@@ -10,6 +10,7 @@
  *                             "Transfer-Encoding: compress"
  */
 class speech_processor
+: private mumbler::agent
 {
 public:
     static constexpr char URL[] = 
@@ -38,7 +39,11 @@ public:
                  size_t nmemb);
     
 private:
+    std::ofstream ofs__;
+    mumbler::reply_pool<std::string> pool__;
     std::string userpass__;
+    std::string robotname__("nao");
+    std::string username__("");
 };
 
 #endif
