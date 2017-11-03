@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(mic_processor)
 
 find_package(qibuild)
+find_package(CURL REQUIRED) 
 
 # set C++14 flags, ATOM CPU, and link static to libstdc++ (for C++14)
 set(CMAKE_CXX_FLAGS 
@@ -12,7 +13,18 @@ option(SOUNDPROCESSING_IS_REMOTE
         ON)
 # Create a executable named mic_processor
 # with the source file: main.cpp
-qi_create_bin(mic_processor main.cpp alsoundprocessing.cpp AudioFile/AudioFile.cpp)
+qi_create_bin(mic_processor main.cpp 
+                            alsoundprocessing.cpp 
+                            speech_processor.cpp
+                            AudioFile/AudioFile.cpp)
 
 # link with
-qi_use_lib(mic_processor ALCOMMON ALPROXIES ALAUDIO QI boost_system boost_thread pthread)
+qi_use_lib(mic_processor 
+           ALCOMMON 
+           ALPROXIES 
+           ALAUDIO 
+           QI 
+           boost_system 
+           boost_thread 
+           pthread
+           curl)

@@ -1,35 +1,21 @@
-/**
-* @author Gwennael Gate
-* Copyright (c) Aldebaran Robotics 2010, 2011
-*/
-
-
 #ifndef SOUNDPROCESSING_H
 #define SOUNDPROCESSING_H
-#include <string>
-#include <rttools/rttime.h>
-#include <qi/application.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
-#include <alvalue/alvalue.h>
-#include <alproxies/almemoryproxy.h>
-#include <alaudio/alsoundextractor.h>
-#include "AudioFile/AudioFile.h"
+#include "includes.ihh"
+#include "speech_processor.hpp"
 
 using namespace AL;
 
-class ALSoundProcessing 
+class microphone 
 : public ALSoundExtractor
 {
 public:
     // CTOR
-    ALSoundProcessing(boost::shared_ptr<ALBroker> pBroker, 
-                      std::string pName,
-                      float noise_level = 800.f);
+    microphone(boost::shared_ptr<ALBroker> pBroker, 
+               std::string pName,
+               float noise_level = 800.f);
 
     // DTOR
-    virtual ~ALSoundProcessing();
+    virtual ~microphone();
 
     //method inherited from almodule that will be called after constructor
     void init();
@@ -41,11 +27,10 @@ public:
     // @param timeStamp is the timestamp
     //
     void process(const int & nbOfChannels,
-               const int & nbrOfSamplesByChannel,
-               const AL_SOUND_FORMAT * buffer,
-               const ALValue & timeStamp);
-
-private:
+                 const int & nbrOfSamplesByChannel,
+                 const AL_SOUND_FORMAT * buffer,
+                 const ALValue & timeStamp);
+protected:
     
     // create an audio file buffer
     void open_buffer(unsigned int channels,
@@ -59,13 +44,16 @@ private:
     // close the audio file (using existing buffer)
     void close_buffer();
 
+private:
     ALMemoryProxy fProxyToALMemory;
     std::vector<std::string> fALMemoryKeys;
 
-    unsigned int frequency = 48000;
+    std::unique_ptr<speech_processor> s2t;     // S2T handler
+
+    unsigned int frequency = 48000;            // 48Khz, 16bit Quad Channel audio
 
     static constexpr unsigned int window = 60; // 600ms speech window
-    float average = 0.f;                       // average microphone energy
+    float average = 800.f;                     // average microphone energy
 
     std::array<float,window> level{};          // energy level window
     float threshold = 800.f;                   // delta energy threshold

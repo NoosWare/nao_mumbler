@@ -8,6 +8,7 @@ For more info on how to use the toolchain, please see: https://github.com/aldeba
 # BUILDING
 
 ```
-qibuild configure mic_processor
-qibuild make mic_processor
+cd micprocessor
+qibuild configure -c naoqi-sdk -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING
+qibuild make -c naoqi-sdk
 ```

@@ -1,0 +1,42 @@
+#include <signal.h>
+#include <boost/shared_ptr.hpp>
+#include <alcommon/albroker.h>
+#include <alcommon/almodule.h>
+#include <alcommon/albrokermanager.h>
+#include <alcommon/altoolsmain.h>
+#include <string>
+#include <rttools/rttime.h>
+#include <qi/application.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+#include <alvalue/alvalue.h>
+#include <alproxies/almemoryproxy.h>
+#include <alaudio/alsoundextractor.h>
+#include "AudioFile/AudioFile.h"
+#include <alcommon/alproxy.h>
+#include <iostream>
+#include <numeric>
+#include <cmath>
+#include <ctime>
+#include <boost/lexical_cast.hpp>
+#include <string>
+#include <fstream>
+#include <streambuf>
+#include <cstdio>
+#include <stdio.h>
+#include <fcntl.h>
+
+#ifdef WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+#include <sys/types.h>
+#include <sys/stat.h>
+ 
+#include <curl/curl.h>
+ 
+#if LIBCURL_VERSION_NUM < 0x070c03
+#error "upgrade your libcurl to no less than 7.12.3"
+#endif

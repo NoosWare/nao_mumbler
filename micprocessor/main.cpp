@@ -1,9 +1,4 @@
-#include <signal.h>
-#include <boost/shared_ptr.hpp>
-#include <alcommon/albroker.h>
-#include <alcommon/almodule.h>
-#include <alcommon/albrokermanager.h>
-#include <alcommon/altoolsmain.h>
+#include "includes.ihh"
 
 // include the modules
 #include "alsoundprocessing.hpp"
@@ -18,17 +13,20 @@
 # endif
 #endif
 
+#define BOOST_SIGNALS_NO_DEPRECATION_WARNING
+
 extern "C"
 {
-
   ALCALL int _createModule(boost::shared_ptr<AL::ALBroker> pBroker)
   {
     // init broker with the main broker instance
     // from the parent executable
     AL::ALBrokerManager::setInstance(pBroker->fBrokerManager.lock());
     AL::ALBrokerManager::getInstance()->addBroker(pBroker);
+
     // create module instances
-    AL::ALModule::createModule<ALSoundProcessing>(pBroker,"ALSoundProcessing");
+    AL::ALModule::createModule<microphone>(pBroker, 
+                                           "microphone");
     return 0;
   }
 
@@ -36,15 +34,14 @@ extern "C"
   {
     return 0;
   }
-
 } // extern "C"
 
 int main(int argc, char *argv[] )
 {
+    curl_global_init(CURL_GLOBAL_ALL);
     // pointer to createModule
     TMainType sig;
     sig = &_createModule;
-
     // call main
     ALTools::mainFunction("alsoundprocessing", argc, argv, sig);
 }

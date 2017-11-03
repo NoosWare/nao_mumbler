@@ -1,26 +1,27 @@
 #include "alsoundprocessing.hpp"
-#include <alcommon/alproxy.h>
-#include <iostream>
-#include <numeric>
-#include <cmath>
 
-ALSoundProcessing::ALSoundProcessing(boost::shared_ptr<ALBroker> pBroker,
-                                     std::string pName,
-                                     float noise_level)
-  : ALSoundExtractor(pBroker, pName),
-    threshold(noise_level)
+microphone::microphone(boost::shared_ptr<ALBroker> pBroker,
+                       std::string pName,
+                       float noise_level)
+: ALSoundExtractor(pBroker, pName), 
+  threshold(noise_level)
 {
-  setModuleDescription("This module processes the data collected by the "
-                       "microphones and output in the ALMemory the RMS power "
-                       "of each of the four channels.");
+    setModuleDescription("microphone monitor and data processor");
+    // load IBM credentials from file
+    std::ifstream t("ibm.credentials");
+    std::string str((std::istreambuf_iterator<char>(t)),
+                     std::istreambuf_iterator<char>());
+    // allocate a S2T processor
+    s2t = std::make_unique<speech_processor>(str);
+    assert(s2t);
 }
 
-void ALSoundProcessing::init()
+void microphone::init()
 {
-    fALMemoryKeys.push_back("ALSoundProcessing/leftMicEnergy");
-    fALMemoryKeys.push_back("ALSoundProcessing/rightMicEnergy");
-    fALMemoryKeys.push_back("ALSoundProcessing/frontMicEnergy");
-    fALMemoryKeys.push_back("ALSoundProcessing/rearMicEnergy");
+    fALMemoryKeys.push_back("microphone/leftMicEnergy");
+    fALMemoryKeys.push_back("microphone/rightMicEnergy");
+    fALMemoryKeys.push_back("microphone/frontMicEnergy");
+    fALMemoryKeys.push_back("microphone/rearMicEnergy");
     fProxyToALMemory.insertData(fALMemoryKeys[0], 0.0f);
     fProxyToALMemory.insertData(fALMemoryKeys[1], 0.0f);
     fProxyToALMemory.insertData(fALMemoryKeys[2], 0.0f);
@@ -32,20 +33,20 @@ void ALSoundProcessing::init()
                         1                         //Deinterleaving requested
                         );
 #ifdef SOUNDPROCESSING_IS_REMOTE
-    qi::Application::atStop(boost::bind(&ALSoundProcessing::stopDetection, this));
+    qi::Application::atStop(boost::bind(&microphone::stopDetection, this));
 #endif
     startDetection();
 }
 
-ALSoundProcessing::~ALSoundProcessing()
+microphone::~microphone()
 {
-  stopDetection();
+    stopDetection();
 }
 
-void ALSoundProcessing::process(const int & nbOfChannels,			// number of channels
-                                const int & nbOfSamplesByChannel,	// amount of Samples per channel
-                                const AL_SOUND_FORMAT * buffer,		// actual data buffer
-                                const ALValue & timeStamp)			// timestamp?
+void microphone::process(const int & nbOfChannels,			// number of channels
+                         const int & nbOfSamplesByChannel,	// amount of Samples per channel
+                         const AL_SOUND_FORMAT * buffer,	// actual data buffer
+                         const ALValue & timeStamp)			// timestamp?
 {
     std::array<float, 4> fMicsEnergy = { 0.f, 0.f, 0.f, 0.f};
 	for(int channelInd = 0; channelInd < nbOfChannels; channelInd++){
@@ -90,8 +91,8 @@ void ALSoundProcessing::process(const int & nbOfChannels,			// number of channel
     count++;
 }
 
-void ALSoundProcessing::open_buffer(unsigned int channels,
-                                    unsigned int samples)
+void microphone::open_buffer(unsigned int channels,
+                             unsigned int samples)
 {
     if (!ptr) {
         ptr = std::make_unique<audio>();
@@ -102,9 +103,9 @@ void ALSoundProcessing::open_buffer(unsigned int channels,
     }
 }
 
-void ALSoundProcessing::fill_buffer(unsigned int channels,
-                                    unsigned int samples,
-                                    const AL_SOUND_FORMAT * buffer)
+void microphone::fill_buffer(unsigned int channels,
+                             unsigned int samples,
+                             const AL_SOUND_FORMAT * buffer)
 {
     assert(ptr);
     for (int ch_idx = 0; ch_idx < channels; ch_idx++) {
@@ -114,10 +115,16 @@ void ALSoundProcessing::fill_buffer(unsigned int channels,
     }
 }
 
-void ALSoundProcessing::close_buffer()
+void microphone::close_buffer()
 {
+    // TODO: shouldn't we at this point, block the microphone ???
     assert(ptr);
     ptr->printSummary();
-    ptr->save("audio.wav");
+    std::time_t result = std::time(0);
+    std::string filename = boost::lexical_cast<std::string>(result) + ".wav";
+    ptr->save(filename);
     ptr.release();
+    std::cout << "WAV: " << filename << std::endl;
+    // callback speech_processor now
+    s2t->request(filename);
 }
