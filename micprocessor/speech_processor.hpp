@@ -13,8 +13,7 @@ class speech_processor
 {
 public:
     static constexpr char URL[] = 
-    "10.130.3.26:4444";
-    //"https://stream.watsonplatform.net/speech-to-text/api/v1/recognize";
+    "https://stream.watsonplatform.net/speech-to-text/api/v1/recognize";
 
     /// @brief construct with a valid IBM username and password
     speech_processor(std::string credentials);
@@ -28,15 +27,15 @@ public:
     /// @param size is the data received
     /// @param nmemb is ???
     /// @param object is a void pointer to `speech_processor` *this
-    static void callback(void * data, 
-                         size_t size, 
-                         size_t nmemb, 
-                         void * object);
+    static size_t callback(void * data, 
+                           size_t size, 
+                           size_t nmemb, 
+                           void * object);
 
     /// @brief process the reply into an std::string
-    void reply(void * data, 
-               size_t size, 
-               size_t nmemb);
+    size_t reply(void * data, 
+                 size_t size, 
+                 size_t nmemb);
     
 private:
     std::string userpass__;
