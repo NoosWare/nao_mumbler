@@ -2,6 +2,7 @@
 #include "json/src/json.hpp"
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <algorithm>
 #include <iterator>
 using json = nlohmann::json;
@@ -18,14 +19,14 @@ speech_processor::speech_processor(std::string credentials)
 {
     std::cout << "IBM endpoint: " << URL << std::endl;
     std::cout << "IBM credentials: " << userpass__ << std::endl;
-    ofs__.open("dialogues", std::ofstream::app);
+//    ofs__.open("dialogues", std::ofstream::app);
 }
-
+/*
 ~speech_processor::speech_processor()
 {
     ofs__.close();
 }
-
+*/
 void speech_processor::request(std::string filename)
 {
     CURL * curl;
@@ -108,6 +109,8 @@ size_t speech_processor::reply(void * data,
                                             std::istream_iterator<std::string>{}};
             auto s_t = mumbler::state_trait(tokens);
             auto a_t = mumbler::agent::on_policy(s_t, pool__);
+            // cast and concat
+            auto reply = static_cast<std::vector<std::string>>(a_t);
 			std::string response;
 			for (const auto & str : reply) {
 				std::string prefix_u("$user");
