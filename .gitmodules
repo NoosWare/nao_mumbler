@@ -2,3 +2,10 @@
 	path = micprocessor/AudioFile
 	url = https://github.com/adamstark/AudioFile.git
     ignore = dirty
+[submodule "micprocessor/json"]
+	path = micprocessor/json
+	url = https://github.com/nlohmann/json.git
+[submodule "micprocessor/mumbler"]
+	path = micprocessor/mumbler
+	url = https://github.com/ortelio/mumbler.git
+	branch = deploy

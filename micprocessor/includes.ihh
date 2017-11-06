@@ -13,6 +13,7 @@
 #include <alvalue/alvalue.h>
 #include <alproxies/almemoryproxy.h>
 #include <alaudio/alsoundextractor.h>
+#include <alproxies/altexttospeechproxy.h>
 #include "AudioFile/AudioFile.h"
 #include <alcommon/alproxy.h>
 #include <iostream>
@@ -37,6 +38,11 @@
  
 #include <curl/curl.h>
  
+#include "mumbler/src/agent.hpp"
+#include "mumbler/src/reply_pool.hpp"
+#include "mumbler/src/state.hpp"
+#include "mumbler/src/action.hpp"
+
 #if LIBCURL_VERSION_NUM < 0x070c03
 #error "upgrade your libcurl to no less than 7.12.3"
 #endif

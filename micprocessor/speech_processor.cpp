@@ -109,6 +109,7 @@ size_t speech_processor::reply(void * data,
 					response += str + " ";
 			}
         }
+        std::cout << response;
     }
     // NOTE: result is a JSON which needs to be parsed!
     //
