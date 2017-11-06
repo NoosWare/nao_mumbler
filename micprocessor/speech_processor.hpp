@@ -18,6 +18,9 @@ public:
 
     /// @brief construct with a valid IBM username and password
     speech_processor(std::string credentials);
+    
+    /// @brief destructor
+    ~speech_processor();
 
     /// @brief request speech recognition
     /// @warning @param filename must exist!
@@ -42,9 +45,9 @@ private:
     std::ofstream ofs__;
     mumbler::reply_pool<std::string> pool__;
     std::string userpass__;
-    std::string robotname__("nao");
-    std::string username__("");
-    AL::ALTextToSpeechProxy tts__("127.0.0.1", 9559);
+    std::string robotname__;
+    std::string username__;
+    AL::ALTextToSpeechProxy tts__;
 };
 
 #endif

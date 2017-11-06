@@ -9,10 +9,21 @@ using json = nlohmann::json;
 constexpr char speech_processor::URL[];
 
 speech_processor::speech_processor(std::string credentials)
-: userpass__(credentials)
+: mumbler::agent("mumbler/models/public_d.qval", "mumbler/models/public_p.qval"),
+  pool__("mumbler/data/replies_stage.txt"),
+  robotname__("nao"),
+  username__(""),
+  tts__("127.0.0.1", 9559),
+  userpass__(credentials)
 {
     std::cout << "IBM endpoint: " << URL << std::endl;
     std::cout << "IBM credentials: " << userpass__ << std::endl;
+    ofs__.open("dialogues", std::ofstream::app);
+}
+
+~speech_processor::speech_processor()
+{
+    ofs__.close();
 }
 
 void speech_processor::request(std::string filename)
