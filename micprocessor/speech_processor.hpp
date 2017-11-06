@@ -44,6 +44,7 @@ private:
     std::string userpass__;
     std::string robotname__("nao");
     std::string username__("");
+    AL::ALTextToSpeechProxy tts__("127.0.0.1", 9559);
 };
 
 #endif

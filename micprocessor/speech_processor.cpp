@@ -110,6 +110,7 @@ size_t speech_processor::reply(void * data,
 			}
         }
         std::cout << response;
+        tts__.say(response);
     }
     // NOTE: result is a JSON which needs to be parsed!
     //
