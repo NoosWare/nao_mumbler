@@ -91,8 +91,8 @@ size_t speech_processor::reply(void * data,
     for (const auto result : result_json["results"]) {
         for (const auto alternative :  result["alternatives"]) {
             std::string sentence = alternative["transcript"].get<std::string>();
-            std::cout << sentence;
-            mumbler.request(sentence);   
+            std::cout << "[S2T] " << sentence << std::endl;
+            mumbler.request(sentence);
         }
     }
     return realsize;

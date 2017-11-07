@@ -119,12 +119,12 @@ void microphone::close_buffer()
 {
     // TODO: shouldn't we at this point, block the microphone ???
     assert(ptr);
-    ptr->printSummary();
+    //ptr->printSummary();
     std::time_t result = std::time(0);
     std::string filename = boost::lexical_cast<std::string>(result) + ".wav";
     ptr->save(filename);
     ptr.release();
-    std::cout << "WAV: " << filename << std::endl;
+    //std::cout << "WAV: " << filename << std::endl;
     // callback speech_processor now
     s2t->request(filename);
 }

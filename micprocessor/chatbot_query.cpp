@@ -39,7 +39,7 @@ void chatbot_query::request(std::string query)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
     // craft custom header
     struct curl_slist * chunk = NULL;
-    chunk = curl_slist_append(chunk, "Content-Type: text/plain");
+    chunk = curl_slist_append(chunk, "Content-Type: application/x-www-form-urlencoded");
     // add header
     res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
     if (res != CURLE_OK)
@@ -86,6 +86,7 @@ size_t chatbot_query::reply(void * data,
         else
             response += str + " ";
     }
+    std::cout << "[T2S] " << response << std::endl;
     tts.say(response);
     return realsize;
 }
