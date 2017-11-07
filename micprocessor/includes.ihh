@@ -38,11 +38,6 @@
  
 #include <curl/curl.h>
  
-#include "mumbler/src/agent.hpp"
-#include "mumbler/src/reply_pool.hpp"
-#include "mumbler/src/state.hpp"
-#include "mumbler/src/action.hpp"
-
 #if LIBCURL_VERSION_NUM < 0x070c03
 #error "upgrade your libcurl to no less than 7.12.3"
 #endif

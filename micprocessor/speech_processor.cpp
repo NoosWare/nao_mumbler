@@ -10,23 +10,13 @@ using json = nlohmann::json;
 constexpr char speech_processor::URL[];
 
 speech_processor::speech_processor(std::string credentials)
-: mumbler::agent("mumbler/models/public_d.qval", "mumbler/models/public_p.qval"),
-  pool__("mumbler/data/replies_stage.txt"),
-  robotname__("nao"),
-  username__(""),
-  tts__("127.0.0.1", 9559),
-  userpass__(credentials)
+: userpass__(credentials),
+  mumbler()
 {
     std::cout << "IBM endpoint: " << URL << std::endl;
     std::cout << "IBM credentials: " << userpass__ << std::endl;
-//    ofs__.open("dialogues", std::ofstream::app);
 }
-/*
-~speech_processor::speech_processor()
-{
-    ofs__.close();
-}
-*/
+
 void speech_processor::request(std::string filename)
 {
     CURL * curl;
@@ -64,9 +54,11 @@ void speech_processor::request(std::string filename)
         throw std::runtime_error("failed adding custom headers");
     // RUN
     res = curl_easy_perform(curl);
-    if (res != CURLE_OK)
+    if (res != CURLE_OK) {
         std::cerr << "error running speech_processor query: " 
                   <<  curl_easy_strerror(res) << std::endl;
+        throw std::runtime_error("speech_processor error");
+    }
     curl_slist_free_all(chunk);
     curl_easy_cleanup(curl);
     fclose(fd);
@@ -97,36 +89,11 @@ size_t speech_processor::reply(void * data,
         std::cerr << e.what() << std::endl;
     }
     for (const auto result : result_json["results"]) {
-    //    auto alternatives_obj = result["alternatives"];
         for (const auto alternative :  result["alternatives"]) {
             std::string sentence = alternative["transcript"].get<std::string>();
             std::cout << sentence;
-            size_t position = sentence.find(robotname__);
-            if (position < sentence.length() && position >= 0)
-                sentence.replace(position, robotname__.length(), "$robot");
-            std::istringstream iss(sentence);
-            std::vector<std::string> tokens{std::istream_iterator<std::string>{iss},
-                                            std::istream_iterator<std::string>{}};
-            auto s_t = mumbler::state_trait(tokens);
-            auto a_t = mumbler::agent::on_policy(s_t, pool__);
-            // cast and concat
-            auto reply = static_cast<std::vector<std::string>>(a_t);
-			std::string response;
-			for (const auto & str : reply) {
-				std::string prefix_u("$user");
-				std::string prefix_r("$robot");
-				if (!str.compare(0, prefix_u.size(), prefix_u))
-					response += username__ + " ";
-				else if (!str.compare(0, prefix_r.size(), prefix_r))
-					response += robotname__ + " ";
-				else
-					response += str + " ";
-			}
+            mumbler.request(sentence);   
         }
-        std::cout << response;
-        tts__.say(response);
     }
-    // NOTE: result is a JSON which needs to be parsed!
-    //
     return realsize;
 }

@@ -1,6 +1,7 @@
 #ifndef SPEECH_PROCESSOR
 #define SPEECH_PROCESSOR
 #include "includes.ihh"
+#include "chatbot_query.hpp"
 /**
  * @brief a wrapper class which loads a WAV file and POSTS it to IBM Watson
  * @note  IBM credentials must be correct!
@@ -10,7 +11,6 @@
  *                             "Transfer-Encoding: compress"
  */
 class speech_processor
-: private mumbler::agent
 {
 public:
     static constexpr char URL[] = 
@@ -20,7 +20,7 @@ public:
     speech_processor(std::string credentials);
     
     /// @brief destructor
-    ~speech_processor();
+//    ~speech_processor();
 
     /// @brief request speech recognition
     /// @warning @param filename must exist!
@@ -42,12 +42,7 @@ public:
                  size_t nmemb);
     
 private:
-    std::ofstream ofs__;
-    mumbler::reply_pool<std::string> pool__;
     std::string userpass__;
-    std::string robotname__;
-    std::string username__;
-    AL::ALTextToSpeechProxy tts__;
+    chatbot_query mumbler;
 };
-
 #endif
